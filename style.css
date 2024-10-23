@@ -1,0 +1,33 @@
+*{
+    font-family: aptos;
+}
+
+.text-body-emphasis {
+    font-weight: 700;
+}
+
+.badgeFont {
+    font-size: 15px;
+    margin-left: 2px;
+}
+
+input[type="checkbox"]:checked {
+    accent-color: blue;
+}
+
+.badge {
+    width: 170px;
+    height: 40px;
+    margin: 2px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#copyButton {
+    transition: background-color 3s ease;
+}
+
+.password{
+    font-family: consolas;
+}

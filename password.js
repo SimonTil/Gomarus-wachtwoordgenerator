@@ -51,7 +51,11 @@ function generatePassword(length, upper, lower, number, symbols){
         if (symbols) password += getRandomChar(false, false, false, true);
         
         while (password.length < length){
-            password += getRandomChar(upper, lower, number, symbols);
+            let nextChar = getRandomChar(upper, lower, number, symbols);
+
+            if(password[password.length -1] !== nextChar) {
+                password += nextChar;
+            }
         }
     }
 

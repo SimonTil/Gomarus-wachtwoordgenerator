@@ -16,10 +16,10 @@ function verifyInput(){
 }
 
 function getRandomChar(upper, lower, number, symbols){
-    var upperChars = "ABCDEFGHJKLPQRSTUVWYZ";
-    var lowerChars = "abcdefghijkpqrstuvwyz";
-    var numberChars = "23456789";
-    var symbolChars = "!@#%?&/";
+    var upperChars = "ABCDEFGHJKLPQRTUVWYZ";
+    var lowerChars = "abcdefghijkpqrtuvwyz";
+    var numberChars = "2346789";
+    var symbolChars = "!@%?&";
     var charSet = "";
 
     if (upper) charSet += upperChars;

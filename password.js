@@ -19,7 +19,7 @@ function getRandomChar(upper, lower, number, symbols){
     var upperChars = "ABCDEFGHJKLPQRTUVWYZ";
     var lowerChars = "abcdefghijkpqrtuvwyz";
     var numberChars = "2346789";
-    var symbolChars = "!@%?&";
+    var symbolChars = "!@?-";
     var charSet = "";
 
     if (upper) charSet += upperChars;
@@ -42,26 +42,12 @@ function generatePassword(length, upper, lower, number, symbols){
         password += getRandomChar(upper, lower, number, symbols);
     }
 
-    while (has3IdenticalChars(password))
-    {
-        password = "";
-        if (upper) password += getRandomChar(true, false, false, false);
-        if (lower) password += getRandomChar(false, true, false, false);
-        if (number) password += getRandomChar(false, false, true, false);
-        if (symbols) password += getRandomChar(false, false, false, true);
-        
-        while (password.length < length){
-            let nextChar = getRandomChar(upper, lower, number, symbols);
-
-            if(password[password.length -1] !== nextChar) {
-                password += nextChar;
-            }
-        }
-    }
-
-    var arr = password.split('');
-    arr.sort(() => Math.random() - 0.5);
-    password = arr.join('');
+    // Shuffle the password until it meets the policies "no 2 identical chars on a row"
+    do{
+        var arr = password.split('');
+        arr.sort(() => Math.random() - 0.5);
+        password = arr.join('');
+    }while(constraints(password));
 
     if (length < 4) {
         password = password.substring(0, length);
@@ -91,9 +77,9 @@ function resetCopyButton() {
     button.classList.add('btn-outline-secondary');
 }
 
-function has3IdenticalChars(password) {
-    for (var i = 0; i < password.length - 2; i++) {
-        if (password[i] === password[i + 1] && password[i] === password[i + 2]) {
+function constraints(password){
+    for (var i = 0; i < password.length - 1; i++){
+        if (password[i] === password[i + 1]){
             return true;
         }
     }

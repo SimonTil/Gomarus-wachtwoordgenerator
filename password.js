@@ -82,7 +82,7 @@ function showCrackTime(password) {
         const seconds = index / 1000000;
         const result = formatTime(seconds);
 
-        document.getElementById("cracktime").innerText =
+        document.getElementById("cracktime").innerHTML =
             `Geschatte kraaktijd: ${result}`;
     } catch (err) {
         document.getElementById("cracktime").innerText = err.message;
@@ -103,38 +103,51 @@ function getIndex(password, charset) {
 }
 
 function formatTime(seconds) {
+    const microsecond = 0.000001;
     const millisecond = 0.001;
     const minute = 60;
     const hour = 3600;
     const day = 86400;
     const year = 31556926;
 
-    if (seconds < millisecond) return "< 1 milliseconde";
-    if (seconds / year > 100000) return "> 100.000 jaren";
+    if (seconds < microsecond) return "< 1 microseconde";
 
     // Function to format the number: 2 significant numbers, dot for thousand-separator, comma for decimal-separator
-    function fmt(value, singular, plural) {
-        let val = Number(value.toPrecision(2));
+    function fmt(value, singular, plural, precision) {
+        let val = Number(value.toPrecision(precision));
         let formatted = val.toLocaleString("nl-NL");
         return `± ${formatted} ${val === 1 ? singular : plural}`;
     }
 
     if (seconds < 1) {
-        return fmt(seconds * 1000, "milliseconde", "milliseconden");
+        return fmt(seconds * 1000000, "microseconde", "microseconden", 2);
+    }
+    if (seconds < 1) {
+        return fmt(seconds * 1000, "milliseconde", "milliseconden", 2);
     }
     if (seconds < minute) {
-        return fmt(seconds, "seconde", "seconden");
+        return fmt(seconds, "seconde", "seconden", 3);
     }
     if (seconds < hour) {
-        return fmt(seconds / minute, "minuut", "minuten");
+        return fmt(seconds / minute, "minuut", "minuten", 2);
     }
     if (seconds < day) {
-        return fmt(seconds / hour, "uur", "uren");
+        return fmt(seconds / hour, "uur", "uren", 2);
     }
     if (seconds < year) {
-        return fmt(seconds / day, "dag", "dagen");
+        return fmt(seconds / day, "dag", "dagen", 3);
     }
-    return fmt(seconds / year, "jaar", "jaren");
+
+    let years = seconds / year;
+    if (years > 10000000) {
+        let expStr = years.toExponential(2);
+        let [mantissa, exponent] = expStr.split("e");
+        mantissa = mantissa.replace(".", ",");
+        exponent = exponent.replace("+", "");
+        return `± ${mantissa} × 10<sup>${exponent}</sup> jaren`;
+    }
+
+    return fmt(years, "jaar", "jaren", 4);
 }
 
 

@@ -31,3 +31,11 @@ input[type="checkbox"]:checked {
 .password{
     font-family: consolas;
 }
+
+.cracktime {
+    margin-top: 25px;
+    margin-bottom: 0px;
+    font-style: italic;
+    color: #555;
+    text-align: center;
+}

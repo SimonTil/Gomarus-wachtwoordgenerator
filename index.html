@@ -47,7 +47,7 @@
                     <div class="col-12 col-md-3 col-lg-3">
                         <div class="input-group">
                             <span class="input-group-text">Aantal karakters</span>
-                            <input type="text" class="form-control length" maxlength="4" value="12">
+                            <input type="text" class="form-control length" maxlength="2" value="12">
                         </div>
                     </div>
                 </div>
@@ -55,17 +55,21 @@
 
                 <div class="col-md-4 text-center mx-auto d-grid gap-2 d-sm-flex justify-content-sm-center">
                     <button type="button" class="btn btn-primary btn-md px-4 gap-3"
-                    onclick="if (verifyInput() == true) { document.querySelector('.password').value = generatePassword(document.querySelector('.length').value, document.querySelector('.uppercase').checked, document.querySelector('.lowercase').checked, document.querySelector('.numbers').checked, document.querySelector('.symbols').checked); }">Genereer!</button>
+                        onclick="if (verifyInput()) { document.querySelector('.password').value = generatePassword(); }">Genereer!</button>
                     <div class="input-group">
-                        <input type="text" class="form-control password" value="">
-                        <button type="button" class="btn btn-outline-secondary copy" onclick="copyToClipboard();">Kopieer</button>
+                        <input type="text" id="result" class="form-control password" value="" readonly>
+                        <button type="button" class="btn btn-outline-secondary copy" onclick="copyPassword();">Kopieer</button>
                     </div>
+                </div>
+
+                <div class="mx-auto justify-content-sm-center">
+                    <p id="cracktime" class="cracktime"></p>
                 </div>
             </form>
         </div>
     </div>
     <footer class="py-3 my-4">
-        <p class="text-center text-body-secondary">© 2024 Gomarus Scholengemeenschap</p>
+        <p class="text-center text-body-secondary">© 2025 Gomarus Scholengemeenschap</p>
     </footer>
 </body>
 </html>

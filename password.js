@@ -1,3 +1,8 @@
+const upperChars = "ABCDEFGHJKLPQRTUVWYZ";
+const lowerChars = "abcdefghijkpqrtuvwyz";
+const numberChars = "2346789";
+const symbolChars = "!@?-";
+
 function verifyInput(){
     const form = document.forms[0];
     if (![0, 1, 2, 3].some(i => form.elements[i].checked)) {
@@ -15,56 +20,121 @@ function verifyInput(){
     return 1;
 }
 
-function getRandomChar(upper, lower, number, symbols){
-    var upperChars = "ABCDEFGHJKLPQRSTUVWYZ";
-    var lowerChars = "abcdefghijkpqrstuvwyz";
-    var numberChars = "23456789";
-    var symbolChars = "!@#%?&/";
-    var charSet = "";
+function generatePassword(){
+    const lengthEl  = document.querySelector('.length');
+    const upperEl   = document.querySelector('.uppercase');
+    const lowerEl   = document.querySelector('.lowercase');
+    const numberEl  = document.querySelector('.numbers');
+    const symbolEl  = document.querySelector('.symbols');
 
-    if (upper) charSet += upperChars;
-    if (lower) charSet += lowerChars;
-    if (number) charSet += numberChars;
-    if (symbols) charSet += symbolChars;
+    const length  = parseInt(lengthEl.value);
+    const upper   = upperEl && upperEl.checked;
+    const lower   = lowerEl && lowerEl.checked;
+    const number  = numberEl && numberEl.checked;
+    const symbols = symbolEl && symbolEl.checked;
 
-    return charSet.charAt(Math.floor(Math.random() * charSet.length));
-}
-
-function generatePassword(length, upper, lower, number, symbols){
     var password = "";
-    
-    if (upper) password += getRandomChar(true, false, false, false);
-    if (lower) password += getRandomChar(false, true, false, false);
-    if (number) password += getRandomChar(false, false, true, false);
-    if (symbols) password += getRandomChar(false, false, false, true);
+    if (upper)   password += upperChars.charAt(Math.floor(Math.random() * upperChars.length));
+    if (lower)   password += lowerChars.charAt(Math.floor(Math.random() * lowerChars.length));
+    if (number)  password += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
+    if (symbols) password += symbolChars.charAt(Math.floor(Math.random() * symbolChars.length));
+
+    let allChars = "";
+    if (upper)   allChars += upperChars;
+    if (lower)   allChars += lowerChars;
+    if (number)  allChars += numberChars;
+    if (symbols) allChars += symbolChars;
 
     while (password.length < length){
-        password += getRandomChar(upper, lower, number, symbols);
+        password += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
 
-    while (has3IdenticalChars(password))
-    {
-        password = "";
-        if (upper) password += getRandomChar(true, false, false, false);
-        if (lower) password += getRandomChar(false, true, false, false);
-        if (number) password += getRandomChar(false, false, true, false);
-        if (symbols) password += getRandomChar(false, false, false, true);
-        
-        while (password.length < length){
-            password += getRandomChar(upper, lower, number, symbols);
-        }
-    }
-
-    var arr = password.split('');
-    arr.sort(() => Math.random() - 0.5);
-    password = arr.join('');
+    // Shuffle the password until it meets the policies "no 2 identical chars on a row"
+    do {
+        var arr = password.split('');
+        arr.sort(() => Math.random() - 0.5);
+        password = arr.join('');
+    } while(constraints(password));
 
     if (length < 4) {
         password = password.substring(0, length);
     }
 
     resetCopyButton();
+
+    showCrackTime(password);
     return password;
+}
+
+function showCrackTime(password) {
+    try {
+        // Kijk welke sets aangevinkt zijn
+        let activeCharset = "";
+        if (document.querySelector('.uppercase').checked) activeCharset += upperChars;
+        if (document.querySelector('.lowercase').checked) activeCharset += lowerChars;
+        if (document.querySelector('.numbers').checked)   activeCharset += numberChars;
+        if (document.querySelector('.symbols').checked)   activeCharset += symbolChars;
+
+        // Fallback als niets gekozen is (zou eigenlijk niet mogen door verifyInput)
+        if (activeCharset === "") activeCharset = globalCharset;
+
+        const index = getIndex(password, activeCharset);
+        const seconds = index / 1000000;
+        const result = formatTime(seconds);
+
+        document.getElementById("cracktime").innerText =
+            `Geschatte kraaktijd: ${result}`;
+    } catch (err) {
+        document.getElementById("cracktime").innerText = err.message;
+    }
+}
+
+function getIndex(password, charset) {
+    const N = charset.length;
+    let index = 0;
+    for (let i = 0; i < password.length; i++) {
+        const pos = charset.indexOf(password[i]);
+        if (pos === -1) {
+            throw new Error(`Teken '${password[i]}' zit niet in charset.`);
+        }
+        index = index * N + pos;
+    }
+    return index;
+}
+
+function formatTime(seconds) {
+    const millisecond = 0.001;
+    const minute = 60;
+    const hour = 3600;
+    const day = 86400;
+    const year = 31556926;
+
+    if (seconds < millisecond) return "< 1 milliseconde";
+    if (seconds / year > 100000) return "> 100.000 jaren";
+
+    // Function to format the number: 2 significant numbers, dot for thousand-separator, comma for decimal-separator
+    function fmt(value, singular, plural) {
+        let val = Number(value.toPrecision(2));
+        let formatted = val.toLocaleString("nl-NL");
+        return `± ${formatted} ${val === 1 ? singular : plural}`;
+    }
+
+    if (seconds < 1) {
+        return fmt(seconds * 1000, "milliseconde", "milliseconden");
+    }
+    if (seconds < minute) {
+        return fmt(seconds, "seconde", "seconden");
+    }
+    if (seconds < hour) {
+        return fmt(seconds / minute, "minuut", "minuten");
+    }
+    if (seconds < day) {
+        return fmt(seconds / hour, "uur", "uren");
+    }
+    if (seconds < year) {
+        return fmt(seconds / day, "dag", "dagen");
+    }
+    return fmt(seconds / year, "jaar", "jaren");
 }
 
 
@@ -87,9 +157,10 @@ function resetCopyButton() {
     button.classList.add('btn-outline-secondary');
 }
 
-function has3IdenticalChars(password) {
-    for (var i = 0; i < password.length - 2; i++) {
-        if (password[i] === password[i + 1] && password[i] === password[i + 2]) {
+function constraints(password){
+    // No more than 2 identical characters
+    for (var i = 0; i < password.length - 1; i++) {
+        if (password[i] === password[i + 1]) {
             return true;
         }
     }

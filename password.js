@@ -4,34 +4,41 @@ const numberChars = "2346789";
 const symbolChars = "!@?-";
 
 function verifyInput(){
-    const form = document.forms[0];
-    if (![0, 1, 2, 3].some(i => form.elements[i].checked)) {
+    const upperEl = document.getElementById("caps");
+    const lowerEl = document.getElementById("lowers");
+    const numberEl = document.getElementById("numbers");
+    const symbolEl = document.getElementById("symbols");
+    const lengthEl = document.getElementById("numChars");
+
+    if (!(upperEl.checked || lowerEl.checked || numberEl.checked || symbolEl.checked)) {
         alert('Vergeten aan te geven welke tekens in het wachtwoord moeten!');
         return 0;
     }
-    if (form.elements[4].value == ""){
+    if (lengthEl.value == ""){
         alert('Vergeten aantal karakters in te voeren');
         return 0;
     }
-    if (isNaN(form.elements[4].value) || form.elements[4].value <= 0){
+    if (isNaN(lengthEl.value) || lengthEl.value <= 0){
         alert('Foutieve invoer voor aantal karakters');
         return 0;
     }
+
     return 1;
 }
 
 function generatePassword(){
-    const lengthEl  = document.querySelector('.length');
-    const upperEl   = document.querySelector('.uppercase');
-    const lowerEl   = document.querySelector('.lowercase');
-    const numberEl  = document.querySelector('.numbers');
-    const symbolEl  = document.querySelector('.symbols');
+    const lengthEl  = document.getElementById("numChars");
+    const upperEl   = document.getElementById("caps");
+    const lowerEl   = document.getElementById("lowers");
+    const numberEl  = document.getElementById("numbers");
+    const symbolEl  = document.getElementById("symbols");
+    
 
     const length  = parseInt(lengthEl.value);
-    const upper   = upperEl && upperEl.checked;
-    const lower   = lowerEl && lowerEl.checked;
-    const number  = numberEl && numberEl.checked;
-    const symbols = symbolEl && symbolEl.checked;
+    const upper   = upperEl.checked;
+    const lower   = lowerEl.checked;
+    const number  = numberEl.checked;
+    const symbols = symbolEl.checked;
 
     var password = "";
     if (upper)   password += upperChars.charAt(Math.floor(Math.random() * upperChars.length));
@@ -70,10 +77,10 @@ function showCrackTime(password) {
     try {
         // Kijk welke sets aangevinkt zijn
         let activeCharset = "";
-        if (document.querySelector('.uppercase').checked) activeCharset += upperChars;
-        if (document.querySelector('.lowercase').checked) activeCharset += lowerChars;
-        if (document.querySelector('.numbers').checked)   activeCharset += numberChars;
-        if (document.querySelector('.symbols').checked)   activeCharset += symbolChars;
+        if (document.getElementById("caps").checked)    activeCharset += upperChars;
+        if (document.getElementById("lowers").checked)  activeCharset += lowerChars;
+        if (document.getElementById("numbers").checked) activeCharset += numberChars;
+        if (document.getElementById("symbols").checked) activeCharset += symbolChars;
 
         // Fallback als niets gekozen is (zou eigenlijk niet mogen door verifyInput)
         if (activeCharset === "") activeCharset = globalCharset;
@@ -104,7 +111,6 @@ function getIndex(password, charset) {
 
 function formatTime(seconds) {
     const microsecond = 0.000001;
-    const millisecond = 0.001;
     const minute = 60;
     const hour = 3600;
     const day = 86400;
@@ -119,24 +125,12 @@ function formatTime(seconds) {
         return `± ${formatted} ${val === 1 ? singular : plural}`;
     }
 
-    if (seconds < 1) {
-        return fmt(seconds * 1000000, "microseconde", "microseconden", 2);
-    }
-    if (seconds < 1) {
-        return fmt(seconds * 1000, "milliseconde", "milliseconden", 2);
-    }
-    if (seconds < minute) {
-        return fmt(seconds, "seconde", "seconden", 3);
-    }
-    if (seconds < hour) {
-        return fmt(seconds / minute, "minuut", "minuten", 2);
-    }
-    if (seconds < day) {
-        return fmt(seconds / hour, "uur", "uren", 2);
-    }
-    if (seconds < year) {
-        return fmt(seconds / day, "dag", "dagen", 3);
-    }
+    if (seconds < 1) return fmt(seconds * 1000000, "microseconde", "microseconden", 2);
+    if (seconds < 1) return fmt(seconds * 1000, "milliseconde", "milliseconden", 2);
+    if (seconds < minute) return fmt(seconds, "seconde", "seconden", 3);
+    if (seconds < hour) return fmt(seconds / minute, "minuut", "minuten", 2);
+    if (seconds < day) return fmt(seconds / hour, "uur", "uren", 2);
+    if (seconds < year) return fmt(seconds / day, "dag", "dagen", 3);
 
     let years = seconds / year;
     if (years > 10000000) {
@@ -152,9 +146,9 @@ function formatTime(seconds) {
 
 
 function copyToClipboard(){
-    var text = document.forms[0].elements[6].value;
+    const text = document.getElementById("result").value;
     navigator.clipboard.writeText(text).then(function(){
-        var button = document.forms[0].elements[7];
+        var button = document.getElementById("copy");
         button.innerText = "Gekopieerd!";
         button.classList.remove('btn-outline-secondary');
         button.classList.add('btn-success');
@@ -181,5 +175,5 @@ function constraints(password){
 }
 
 window.onload = function(){
-    document.forms[0].elements[6].value = generatePassword(12, true, true, true, true);
+    document.getElementById("result").value = generatePassword(12, true, true, true, true);
 }

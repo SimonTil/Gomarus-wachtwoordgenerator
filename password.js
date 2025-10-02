@@ -90,7 +90,7 @@ function showCrackTime(password) {
         const result = formatTime(seconds);
 
         document.getElementById("cracktime").innerHTML =
-            `Geschatte kraaktijd: ${result}`;
+            `Geschatte kraaktijd (brute-force): ${result}`;
     } catch (err) {
         document.getElementById("cracktime").innerText = err.message;
     }

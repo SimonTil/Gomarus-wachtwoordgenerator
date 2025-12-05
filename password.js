@@ -138,7 +138,7 @@ function formatTime(seconds) {
         let [mantissa, exponent] = expStr.split("e");
         mantissa = mantissa.replace(".", ",");
         exponent = exponent.replace("+", "");
-        return `± ${mantissa} × 10<sup>${exponent}</sup> jaren`;
+        return `±&nbsp;${mantissa}&nbsp;×&nbsp;10<sup>${exponent}</sup>&nbsp;jaren`;
     }
 
     return fmt(years, "jaar", "jaren", 4);

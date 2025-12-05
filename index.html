@@ -12,48 +12,52 @@
 <body>
     <div class="container my-5">
         <div class="p-5 text-center bg-body-tertiary rounded-3">
-            <h1 class="text-body-emphasis">Gomarus wachtwoordgenerator</h1>
+            <!-- Logo -->
+            <div class="text-center mt-3">
+                <img src="logo.png" alt="Gomarus Logo" class="gomarus-logo">
+            </div>
+
+            <!-- Title and subtitle -->
+            <h1 class="text-body-emphasis">Wachtwoordgenerator</h1>
             <p class="col-lg-8 mx-auto fs-5 text-muted">
                 Genereer een sterk wachtwoord. Gebruik daarvoor de volgende vereisten:
             </p>
             
             <form class="form">
-                <div class="d-inline-flex gap-2">
-                    <div class="d-flex gap-2 justify-content-center">
-                        <div class="d-inline-flex flex-wrap gap-2 justify-content-center">
-                            <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
-                                <input id="caps" type="checkbox" class="uppercase ms-1 me-1" checked>
-                                <span class="px-1 badgeFont">Hoofdletters</span>
-                            </span>
-                            <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
-                                <input id="lowers" type="checkbox" class="lowercase ms-1 me-1" checked>
-                                <span class="px-1 badgeFont">Kleine letters</span>
-                            </span>
-                        </div>
-                        <div class="d-inline-flex flex-wrap gap-2 justify-content-center">
-                            <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
-                                <input id="numbers" type="checkbox" class="numbers ms-1 me-1" checked>
-                                <span class="px-1 badgeFont">Getallen</span>
-                            </span>
-                            <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
-                                <input id="symbols" type="checkbox" class="symbols ms-1 me-1" checked>
-                                <span class="px-1 badgeFont">Vreemde tekens</span>
-                            </span>
-                        </div>
-                    </div>
+                <!-- Buttons -->
+                <div class="badge-grid">
+                    <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
+                        <input id="caps" type="checkbox" class="uppercase ms-1 me-1" checked>
+                        <span class="px-1 badgeFont">Hoofdletters</span>
+                    </span>
+
+                    <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
+                        <input id="lowers" type="checkbox" class="lowercase ms-1 me-1" checked>
+                        <span class="px-1 badgeFont">Kleine letters</span>
+                    </span>
+
+                    <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
+                        <input id="numbers" type="checkbox" class="numbers ms-1 me-1" checked>
+                        <span class="px-1 badgeFont">Getallen</span>
+                    </span>
+
+                    <span class="badge d-flex p-2 align-items-center text-primary-emphasis bg-primary-subtle rounded-pill">
+                        <input id="symbols" type="checkbox" class="symbols ms-1 me-1" checked>
+                        <span class="px-1 badgeFont">Vreemde tekens</span>
+                    </span>
                 </div>
             
+                <!-- Number of chars -->
                 <div class="d-flex justify-content-center mt-3">
-                    <div class="col-12 col-md-3 col-lg-3">
-                        <div class="input-group">
-                            <span class="input-group-text">Aantal karakters</span>
-                            <input id="numChars" type="text" class="form-control length" maxlength="2" value="12">
-                        </div>
+                    <div class="input-group mx-auto" style="width: auto;">
+                        <span class="input-group-text">Aantal karakters</span>
+                        <input id="numChars" type="text" class="form-control length" maxlength="2" value="12">
                     </div>
                 </div>
                 <hr class="my-4">
 
-                <div class="col-md-4 text-center mx-auto d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <!-- Generate button -->
+                <div class="text-center mx-auto d-grid gap-2 d-sm-flex justify-content-sm-center password-group">
                     <button id="generate" type="button" class="btn btn-primary btn-md px-4 gap-3" onclick="if (verifyInput()) { document.querySelector('.password').value = generatePassword(); }">Genereer!</button>
                     <div class="input-group">
                         <input type="text" id="result" class="form-control password" value="" readonly>
@@ -61,12 +65,15 @@
                     </div>
                 </div>
 
+                <!-- Cracktime -->
                 <div class="mx-auto justify-content-sm-center">
                     <p id="cracktime" class="cracktime"></p>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- Footer -->
     <footer class="py-3 my-4">
         <p class="text-center text-body-secondary">© 2025 Gomarus Scholengemeenschap</p>
     </footer>

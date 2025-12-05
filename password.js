@@ -122,7 +122,7 @@ function formatTime(seconds) {
     function fmt(value, singular, plural, precision) {
         let val = Number(value.toPrecision(precision));
         let formatted = val.toLocaleString("nl-NL");
-        return `± ${formatted} ${val === 1 ? singular : plural}`;
+        return `±&nbsp;${formatted}&nbsp;${val === 1 ? singular : plural}`;
     }
 
     if (seconds < 1) return fmt(seconds * 1000000, "microseconde", "microseconden", 2);
@@ -152,6 +152,12 @@ function copyToClipboard(){
         button.innerText = "Gekopieerd!";
         button.classList.remove('btn-outline-secondary');
         button.classList.add('btn-success');
+        // Reset after 10 seconds
+        setTimeout(function() {
+            button.innerText = "Kopieer";
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 10000);
     }, function() {
         alert("Kopiëren mislukt...");
     });

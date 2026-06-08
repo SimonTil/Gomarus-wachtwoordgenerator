@@ -2,6 +2,7 @@ const upperChars = "ABCDEFGHJKLPQRTUVWYZ";
 const lowerChars = "abcdefghijkpqrtuvwyz";
 const numberChars = "2346789";
 const symbolChars = "!@?-";
+let copyTimeoutId = null;
 
 function verifyInput(){
     const upperEl = document.getElementById("caps");
@@ -12,18 +13,18 @@ function verifyInput(){
 
     if (!(upperEl.checked || lowerEl.checked || numberEl.checked || symbolEl.checked)) {
         alert('Vergeten aan te geven welke tekens in het wachtwoord moeten!');
-        return 0;
+        return false;
     }
     if (lengthEl.value == ""){
         alert('Vergeten aantal karakters in te voeren');
-        return 0;
+        return false;
     }
     if (isNaN(lengthEl.value) || lengthEl.value <= 0){
         alert('Foutieve invoer voor aantal karakters');
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 function generatePassword(){
@@ -40,11 +41,13 @@ function generatePassword(){
     const number  = numberEl.checked;
     const symbols = symbolEl.checked;
 
+    // Seed one char per enabled charset, but never more than the requested length
     var password = "";
-    if (upper)   password += upperChars.charAt(Math.floor(Math.random() * upperChars.length));
-    if (lower)   password += lowerChars.charAt(Math.floor(Math.random() * lowerChars.length));
-    if (number)  password += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
-    if (symbols) password += symbolChars.charAt(Math.floor(Math.random() * symbolChars.length));
+    let seedCount = 0;
+    if (upper   && seedCount < length) { password += upperChars.charAt(randomChar(upperChars.length));  seedCount++; }
+    if (lower   && seedCount < length) { password += lowerChars.charAt(randomChar(lowerChars.length));  seedCount++; }
+    if (number  && seedCount < length) { password += numberChars.charAt(randomChar(numberChars.length)); seedCount++; }
+    if (symbols && seedCount < length) { password += symbolChars.charAt(randomChar(symbolChars.length)); seedCount++; }
 
     let allChars = "";
     if (upper)   allChars += upperChars;
@@ -53,64 +56,53 @@ function generatePassword(){
     if (symbols) allChars += symbolChars;
 
     while (password.length < length){
-        password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+        password += allChars.charAt(randomChar(allChars.length));
     }
 
-    // Shuffle the password until it meets the policies "no 2 identical chars on a row"
+    // Shuffle until no two identical adjacent chars; cap at 1000 iterations
+    let attempts = 0;
     do {
         var arr = password.split('');
-        arr.sort(() => Math.random() - 0.5);
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = randomChar(i + 1);
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
         password = arr.join('');
-    } while(constraints(password));
-
-    if (length < 4) {
-        password = password.substring(0, length);
-    }
+        attempts++;
+    } while(constraints(password) && attempts < 1000);
 
     resetCopyButton();
 
-    showCrackTime(password);
+    showCrackTime(password, allChars);
     return password;
 }
 
-function showCrackTime(password) {
-    try {
-        // Kijk welke sets aangevinkt zijn
-        let activeCharset = "";
-        if (document.getElementById("caps").checked)    activeCharset += upperChars;
-        if (document.getElementById("lowers").checked)  activeCharset += lowerChars;
-        if (document.getElementById("numbers").checked) activeCharset += numberChars;
-        if (document.getElementById("symbols").checked) activeCharset += symbolChars;
-
-        // Fallback als niets gekozen is (zou eigenlijk niet mogen door verifyInput)
-        if (activeCharset === "") activeCharset = globalCharset;
-
-        const index = getIndex(password, activeCharset);
-        const seconds = index / 1000000;
-        const result = formatTime(seconds);
-
-        document.getElementById("cracktime").innerHTML =
-            `Geschatte kraaktijd (brute-force): ${result}`;
-    } catch (err) {
-        document.getElementById("cracktime").innerText = err.message;
-    }
+function randomChar(max) {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return arr[0] % max;
 }
 
-function getIndex(password, charset) {
-    const N = charset.length;
-    let index = 0;
-    for (let i = 0; i < password.length; i++) {
-        const pos = charset.indexOf(password[i]);
-        if (pos === -1) {
-            throw new Error(`Teken '${password[i]}' zit niet in charset.`);
-        }
-        index = index * N + pos;
-    }
-    return index;
+function showCrackTime(password, activeCharset) {
+    if (activeCharset === "") return;
+
+    const N = BigInt(activeCharset.length);
+    const L = BigInt(password.length);
+
+    let combinations = 1n;
+    for (let i = 0n; i < L; i++) combinations *= N;
+
+    // Average guesses = combinations / 2, at 1 billion guesses/sec
+    const seconds = Number(combinations / 2n) / 1_000_000_000;
+
+    document.getElementById("cracktime").innerHTML =
+        `Geschatte kraaktijd (brute-force): ${formatTime(seconds)}`;
 }
 
 function formatTime(seconds) {
     const microsecond = 0.000001;
+    const millisecond = 0.001;
+    const second = 1;
     const minute = 60;
     const hour = 3600;
     const day = 86400;
@@ -125,8 +117,8 @@ function formatTime(seconds) {
         return `±&nbsp;${formatted}&nbsp;${val === 1 ? singular : plural}`;
     }
 
-    if (seconds < 1) return fmt(seconds * 1000000, "microseconde", "microseconden", 2);
-    if (seconds < 1) return fmt(seconds * 1000, "milliseconde", "milliseconden", 2);
+    if (seconds < millisecond) return fmt(seconds * 1000000, "microseconde", "microseconden", 2);
+    if (seconds < second) return fmt(seconds * 1000, "milliseconde", "milliseconden", 2);
     if (seconds < minute) return fmt(seconds, "seconde", "seconden", 3);
     if (seconds < hour) return fmt(seconds / minute, "minuut", "minuten", 2);
     if (seconds < day) return fmt(seconds / hour, "uur", "uren", 2);
@@ -141,9 +133,10 @@ function formatTime(seconds) {
         return `±&nbsp;${mantissa}&nbsp;×&nbsp;10<sup>${exponent}</sup>&nbsp;jaren`;
     }
 
-    return fmt(years, "jaar", "jaren", 4);
+    const val = Number(years.toPrecision(3));
+    const formatted = val.toLocaleString("nl-NL", { useGrouping: val >= 10000 });
+    return `±&nbsp;${formatted}&nbsp;${val === 1 ? "jaar" : "jaren"}`;
 }
-
 
 function copyToClipboard(){
     const text = document.getElementById("result").value;
@@ -153,10 +146,9 @@ function copyToClipboard(){
         button.classList.remove('btn-outline-secondary');
         button.classList.add('btn-success');
         // Reset after 10 seconds
-        setTimeout(function() {
-            button.innerText = "Kopieer";
-            button.classList.remove('btn-success');
-            button.classList.add('btn-outline-secondary');
+        copyTimeoutId = setTimeout(function() {
+            resetCopyButton();
+            copyTimeoutId = null;
         }, 10000);
     }, function() {
         alert("Kopiëren mislukt...");
@@ -164,7 +156,11 @@ function copyToClipboard(){
 }
 
 function resetCopyButton() {
-    var button = document.forms[0].elements[7];
+    if (copyTimeoutId !== null) {
+        clearTimeout(copyTimeoutId);
+        copyTimeoutId = null;
+    }
+    var button = document.getElementById("copy");
     button.innerText = "Kopieer";
     button.classList.remove('btn-success');
     button.classList.add('btn-outline-secondary');
@@ -181,5 +177,5 @@ function constraints(password){
 }
 
 window.onload = function(){
-    document.getElementById("result").value = generatePassword(12, true, true, true, true);
+    document.getElementById("result").value = generatePassword();
 }
